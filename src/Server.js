@@ -1,38 +1,27 @@
 import restify from 'restify';
-import log4js from 'log4js';
-import Sequelize  from 'sequelize';
-import { ContainerBuilder } from 'node-dependency-injection';
+import { PORT } from '../config/config';
 import LOG_CONFIG from '../config/log.config';
-import { PORT } from '../config/config'
-import { DATABASE, USERNAME, PASSWORD, DB_OPTIONS } from '../config/db.config';
-import { 
-    usersController,
-    ordersController,
-    vendorsController,
-    inventoryController,
-    tokenController
-} from './API';
+import logger from './Utils/Logger';
+import DatabaseConnection from './Data/DatabaseConnection';
+import registerRoutes from './Controllers/index';
 
-const container = new ContainerBuilder();
-const sequelize = new Sequelize(DATABASE, USERNAME, PASSWORD, DB_OPTIONS);
-container.register('database', sequelize);
+var databaseConnection = new DatabaseConnection(logger);
+databaseConnection.Connect(
+    (sequelize) => {
+        // Server
+        var server = restify.createServer();
+        server.use(restify.plugins.queryParser());
+        server.use(restify.plugins.bodyParser());
 
-// Logging
-log4js.configure(LOG_CONFIG);
-const logger = log4js.getLogger('sdlog');
+        registerRoutes(logger, databaseConnection);
 
-// Server
-var server = restify.createServer();
-server.use(restify.plugins.queryParser());
-server.use(restify.plugins.bodyParser());
+        server.listen(PORT, () => {
+            logger.info(`Server started. Listening on ${PORT}`);
+        });
+    },
+    () => {
+        logger.error('Could not connect to database');
+    }
+);
 
 
-usersController(server, logger);
-ordersController(server, logger);
-vendorsController(server, logger);
-inventoryController(server, logger);
-tokenController(server, logger);
-
-server.listen(PORT, () => {
-    logger.info(`Server started. Listening on ${PORT}`);
-});

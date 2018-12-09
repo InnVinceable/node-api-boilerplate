@@ -1,6 +1,9 @@
 const LOG_CONFIG = {
-    appenders: { sdlog: { type: 'file', filename: 'sdlog.log' } },
-    categories: { default: { appenders: ['sdlog'], level: 'debug' } }
+    appenders: { 
+        sdlog: { type: 'file', filename: 'sdlog.log' },
+        sdlogConsole: {type: 'console'}
+    },
+    categories: { default: { appenders: ['sdlog', 'sdlogConsole'], level: 'debug' } }
 }
 
 export default LOG_CONFIG;
