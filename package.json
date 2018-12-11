@@ -16,7 +16,8 @@
     "log4js": "^3.0.6",
     "node-dependency-injection": "^2.2.1",
     "restify": "^7.2.2",
-    "sequelize": "^4.41.2"
+    "sequelize": "^4.41.2",
+    "tedious": "^3.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
