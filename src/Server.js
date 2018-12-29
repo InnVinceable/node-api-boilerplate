@@ -14,14 +14,14 @@ databaseConnection
             server.use(restify.plugins.queryParser());
             server.use(restify.plugins.bodyParser());
 
-            registerRoutes(logger, databaseConnection);
+            registerRoutes(server, logger, sequelize);
 
             server.listen(PORT, () => {
                 logger.info(`Server started. Listening on ${PORT}`);
             });
         })
-    .catch(() => {
-            logger.error('Could not connect to database');
+    .catch((error) => {
+            logger.error(error);
         });
 
 

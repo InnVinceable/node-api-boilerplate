@@ -11,7 +11,7 @@ class DatabaseConnection {
         let logger = this.logger;
         return new Promise((resolve, reject) => {
             try {
-                this.sequelize = new Sequelize(DB_OPTIONS);
+                this.sequelize = new Sequelize(DATABASE, USERNAME, PASSWORD, DB_OPTIONS);
 
                 //test connection
                 this.sequelize
@@ -21,13 +21,13 @@ class DatabaseConnection {
                     })
                     .catch(err => {
                         logger.error('Unable to connect to the database:', err);
-                        reject();
+                        reject(err);
                     });
                 
                 let promises = [];
                 //define and sync models
                 for (var i = 0 ; i < modelsDefs.length ; i++) {
-                    let model = this.sequelize.define(modelsDefs[i].modelName, modelsDefs[i].definition);
+                    let model = this.sequelize.define(modelsDefs[i].modelName, modelsDefs[i].definition(this.sequelize, Sequelize));
                     promises.push(model.sync({force: false}));
                 }
 
@@ -35,9 +35,11 @@ class DatabaseConnection {
                     resolve(this.sequelize);
                 }).catch(err => {
                     this.logger.error('Error in data model sync');
+                    reject(err);
                 });
             } catch (e) {
                 this.logger.error(e);
+                reject(e);
             }
             
         })
