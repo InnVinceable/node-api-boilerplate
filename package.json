@@ -11,12 +11,14 @@
   "author": "Vincent de Gois",
   "license": "ISC",
   "dependencies": {
+    "atob": "^2.1.2",
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.4.0",
     "log4js": "^3.0.6",
     "node-dependency-injection": "^2.2.1",
     "restify": "^7.2.2",
     "sequelize": "^4.41.2",
+    "sha1": "^1.1.1",
     "tedious": "^3.0.1"
   },
   "devDependencies": {
