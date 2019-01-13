@@ -1,8 +1,8 @@
-export const SERVER = 'SERVER';
-export const INSTANCE = 'INSTANCE';
-export const DATABASE = 'DATABASE';
-export const USERNAME = 'USERNAME';
-export const PASSWORD = 'PASSWORD';
+export const SERVER = 'localhost';
+export const INSTANCE = 'SQLEXPRESS';
+export const DATABASE = 'testDATABASE';
+export const USERNAME = 'testUser';
+export const PASSWORD = 'testUser';
 export const DB_OPTIONS = {
     // the sql dialect of the database
     // currently supported: 'mysql', 'sqlite', 'postgres', 'mssql'
@@ -12,7 +12,7 @@ export const DB_OPTIONS = {
     host: 'localhost',
 
     dialectOptions: {
-        instanceName: 'INSTANCE'
+        instanceName: 'SQLEXPRESS'
     },
 
     // custom port; default: dialect default
