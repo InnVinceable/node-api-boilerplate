@@ -1,5 +1,6 @@
 import getDbConnection from '../Data/DatabaseConnection';
 import { ServiceError } from './ServiceErrorCodes';
+import roleService from './role.service';
 import atob from 'atob';
 import sha1 from 'sha1';
 
@@ -39,7 +40,7 @@ export const createUser = (userDetails) => {
     return new Promise((res, rej) => {
         getDbConnection().then((dbConnection) => {
             let User = dbConnection.model('User');
-                User.find({where: {Email: userDetails.Email}})
+                User.findOne({where: {Email: userDetails.Email}})
                     .then((user) => {
                         if (user) {
                             rej(ServiceError.ALREADY_EXISTS);
@@ -112,10 +113,10 @@ export const checkCredentials = (email, password) => {
         var hash = sha1(atob(password));
         getDbConnection().then((dbConnection) => {
             let User = dbConnection.model('User');
-            User.find({where: {Email: email}})
+            User.findOne({where: {Email: email}})
                 .then((user) => {
                     if (user && hash == user.PasswordHash) {
-                        res();
+                        res(user.Id);
                     } else {
                         rej();
                     }
@@ -146,6 +147,86 @@ export const deleteById = (id) => {
     });
 }
 
+export const assignRole = (userId, roleId) => {
+    return new Promise((res, rej) => {
+        getUserById(userId).then((user) => {
+            roleService.getRoleById(roleId).then((role) => {
+                if (user && role) {
+                    getDbConnection().then((dbConnection) => {
+                        let userRoles = dbConnection.model('UserRole');
+                        userRoles.findOrCreate({where: {UserId: userId, RoleId: roleId}}).then(() => {
+                            res();
+                        })
+                    }).catch((err) => {
+                        logger.error(err);
+                        rej();
+                    });
+                }
+            }).catch((err) => {
+                logger.error(err);
+                rej();
+            });;
+        }).catch((err) => {
+            logger.error(err);
+            rej();
+        });
+    });
+}
+
+export const revokeRole = (userId, roleId) => {
+    return new Promise((res, rej) => {
+        getDbConnection().then((dbConnection) => {
+            let userRoles = dbConnection.model('UserRole');
+            userRoles
+                .destroy({
+                    where: {
+                        UserId: userId,
+                        RoleId: roleId
+                    }
+                })
+                .then(() => {
+                    res();
+                })
+                .catch((err) => {
+                    rej(err)
+                });
+        }).catch((err) => {
+            logger.error(err);
+            rej();
+        });
+    });
+}
+
+export const getUserRoles = (userId) => {
+    return new Promise((res, rej) => {
+        getDbConnection().then((dbConnection) => {
+            let userRoles = dbConnection.model('UserRole');
+            let roles = dbConnection.model('Role');
+            roles.hasMany(userRoles, {foreignKey: 'RoleId'});
+            userRoles.belongsTo(roles, {foreignKey: 'RoleId'});
+            userRoles.findAll({where: {UserId: userId}, include: [roles]})
+                .then((userRoles) => {
+                    if (roles) {
+                        let roles = userRoles.map((userRole) => {
+                            return {
+                                Id: userRole.Role.Id,
+                                RoleName: userRole.Role.RoleName
+                            }
+                        })
+                        res(roles);
+                    }
+                    else rej(ServiceError.NOT_FOUND);
+                })
+                .catch((err) => {
+                    rej(err);
+                });
+        }).catch((err) => {
+            logger.error(err);
+            rej();
+        });
+    });
+}
+
 export default {
     getUserById,
     getAllUsers,
@@ -153,5 +234,8 @@ export default {
     updateById,
     deleteById,
     resetPassword,
-    checkCredentials
+    checkCredentials,
+    assignRole,
+    revokeRole,
+    getUserRoles
 }

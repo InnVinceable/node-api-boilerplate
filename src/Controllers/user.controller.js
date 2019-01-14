@@ -1,10 +1,10 @@
 import logger from '../Utils/Logger';
 import userService from '../Services/user.service';
 import { ServiceError } from '../Services/ServiceErrorCodes';
-import { isAuthenticated } from '../Middleware/Authentication';
+import { isAuthorized } from '../Middleware/Authentication';
 
 module.exports = (server, route) => {
-    server.get(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.get(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         userService.getUserById(req.params.Id)
             .then((user) => {
                 if (user) res.send(user);
@@ -18,7 +18,7 @@ module.exports = (server, route) => {
             });
     });
 
-    server.get(`${route}`, isAuthenticated, (req, res, next) => {
+    server.get(`${route}`, isAuthorized([1,4]), (req, res, next) => {
         userService.getAllUsers()
             .then((users) => {
                 if (users) res.send(users);
@@ -32,7 +32,7 @@ module.exports = (server, route) => {
             });
     });
     
-    server.post(route, isAuthenticated, (req, res, next) => {
+    server.post(route, isAuthorized(), (req, res, next) => {
         userService.createUser(req.body)
             .then(() => {
                 res.send(200);
@@ -49,7 +49,7 @@ module.exports = (server, route) => {
             });
     });
     
-    server.put(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.put(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         userService.updateById(req.params.Id, req.body)
             .then(() => {
                 res.send(200);
@@ -59,10 +59,43 @@ module.exports = (server, route) => {
             });
     });
 
-    server.del(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.del(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         userService.deleteById(req.params.Id)
             .then(() => {
                 res.send(200);
+            })
+            .catch((err) => {
+                logger.error(err);
+                res.send(500);
+            })
+    });
+
+    server.post(`${route}/:Id/role/:roleId`, isAuthorized(), (req, res, next) => {
+        userService.assignRole(req.params.Id, req.params.roleId)
+            .then(() => {
+                res.send(200);
+            })
+            .catch((err) => {
+                logger.error(err);
+                res.send(500);
+            })
+    });
+
+    server.del(`${route}/:Id/role/:roleId`, isAuthorized(), (req, res, next) => {
+        userService.revokeRole(req.params.Id, req.params.roleId)
+            .then(() => {
+                res.send(200);
+            })
+            .catch((err) => {
+                logger.error(err);
+                res.send(500);
+            })
+    });
+
+    server.get(`${route}/:Id/role`, isAuthorized(), (req, res, next) => {
+        userService.getUserRoles(req.params.Id)
+            .then((roles) => {
+                res.send(roles);
             })
             .catch((err) => {
                 logger.error(err);

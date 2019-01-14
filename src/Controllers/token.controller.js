@@ -6,12 +6,16 @@ import logger from '../Utils/Logger';
 module.exports = (server, route) => {
     server.post(route, (req, res, next) => {
         userService.checkCredentials(req.body.Email, req.body.Password)
-            .then(() => {
-                let token = jwt.sign({
-                        Email: req.body.Email,
-                        DateObtained: Date.now()
-                    }, SECRET, OPTIONS);
-                res.send(token);
+            .then((id) => {
+                userService.getUserRoles(id).then((roles) => {
+                    let roleIds = roles.map((role) => role.Id);
+                    let token = jwt.sign({
+                            Email: req.body.Email,
+                            DateObtained: Date.now(),
+                            Roles: roleIds
+                        }, SECRET, OPTIONS);
+                    res.send(token);
+                });
             })
             .catch((err) => {
                 if (err) {

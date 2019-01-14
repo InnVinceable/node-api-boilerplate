@@ -1,10 +1,10 @@
 import logger from '../Utils/Logger';
 import roleService from '../Services/role.service';
-import {isAuthenticated} from '../Middleware/Authentication';
+import {isAuthorized} from '../Middleware/Authentication';
 import { ServiceError } from '../Services/ServiceErrorCodes';
 
 module.exports = (server, route) => {
-    server.get(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.get(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         roleService.getRoleById(req.params.Id)
             .then((role) => {
                 if (role) res.send(role);
@@ -18,7 +18,7 @@ module.exports = (server, route) => {
             });
     });
 
-    server.get(route, isAuthenticated, (req, res, next) => {
+    server.get(route, isAuthorized(), (req, res, next) => {
         roleService.getAllRoles()
             .then((roles) => {
                 if (roles) res.send(roles);
@@ -32,7 +32,7 @@ module.exports = (server, route) => {
             });
     });
     
-    server.post(route, isAuthenticated, (req, res, next) => {
+    server.post(route, isAuthorized(), (req, res, next) => {
         roleService.createRole(req.body)
             .then(() => {
                 res.send(200);
@@ -49,7 +49,7 @@ module.exports = (server, route) => {
             });
     });
     
-    server.put(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.put(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         roleService.updateById(req.params.Id, req.body)
             .then(() => {
                 res.send(200)
@@ -60,7 +60,7 @@ module.exports = (server, route) => {
             });
     });
 
-    server.del(`${route}/:Id`, isAuthenticated, (req, res, next) => {
+    server.del(`${route}/:Id`, isAuthorized(), (req, res, next) => {
         roleService.deleteById(req.params.Id)
             .then(() => {
                 res.send(200);
