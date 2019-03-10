@@ -1,7 +1,7 @@
 import logger from '../Utils/Logger';
 import userService from '../Services/user.service';
 import { ServiceError } from '../Services/ServiceErrorCodes';
-import { isAuthorized } from '../Middleware/Authentication';
+import { isAuthorized } from '../Middleware/Auth';
 
 module.exports = (server, route) => {
     server.get(`${route}/:Id`, isAuthorized(), (req, res, next) => {

@@ -1,6 +1,6 @@
 import logger from '../Utils/Logger';
 import roleService from '../Services/role.service';
-import {isAuthorized} from '../Middleware/Authentication';
+import {isAuthorized} from '../Middleware/Auth';
 import { ServiceError } from '../Services/ServiceErrorCodes';
 
 module.exports = (server, route) => {
